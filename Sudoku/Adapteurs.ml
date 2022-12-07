@@ -21,4 +21,6 @@ let unSeul (fs : formule list) : formule =
     in r
 
 (** Création d'une formule équivalente à la formule Tous xs, depuis une liste de formule xs.  *)
-let tous (_ : formule list) : formule = failwith "à faire"
+let tous : formule list -> formule = function
+  | [] -> Top
+  | h::t -> List.fold_left (fun f f' -> Et (f, f')) h t
