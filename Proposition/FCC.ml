@@ -72,8 +72,10 @@ let rec descente_non (formule : formule) : formule =
   )
   | _ -> formule
 
+(** Calcule la conjoncion de deux FCC. *)
 let fcc_conj = FormeClausale.union
 
+(** Calcule la disjonction de deux FCC. *)
 let fcc_disj f1 f2 = FormeClausale.fold
   (fun c1 acc ->
     FormeClausale.fold
