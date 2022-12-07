@@ -69,8 +69,26 @@ let rec descente_non (formule : formule) : formule =
   )
   | _ -> formule
 
+let fcc_conj = FormeClausale.union
+
+let fcc_disj f1 f2 = FormeClausale.fold
+  (fun c1 acc ->
+    FormeClausale.fold
+      (fun c2 acc' -> FormeClausale.add (Clause.union c1 c2) acc')
+      f2 acc
+  )
+  f1 FormeClausale.empty
+
 (** Mise en FCC, étape 3 : calcule la forme clausale associée à une formule. *)
-let formule_to_fcc (_ : formule) : forme_clausale = failwith "à faire"
+let rec formule_to_fcc (formule : formule) : forme_clausale = 
+  match formule with
+  | Et (f, g) -> fcc_conj (formule_to_fcc f) (formule_to_fcc g)
+  | Ou (f, g) -> fcc_disj (formule_to_fcc f) (formule_to_fcc g)
+  | Non (Atome a) -> FormeClausale.singleton (Clause.singleton (Moins, a))
+  | Atome a -> FormeClausale.singleton (Clause.singleton (Plus, a))
+  | Top -> FormeClausale.empty
+  | Bot -> FormeClausale.singleton Clause.empty
+  | _ -> failwith "How did you get here ?"
 
 (** Convertit une formule en une forme clausale conjonctive équivalente.*)
 let formule_to_fcc f = formule_to_fcc (descente_non (retrait_operateurs f))
