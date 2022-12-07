@@ -105,7 +105,7 @@ let string_to_lit_opt (str : string) : litteral option =
   let l = String.length str in
   if l < 2 then None else
   
-  let (s, a) = String.(sub str 0 1, sub str 1 l) in
+  let (s, a) = String.(sub str 0 1, sub str 1 (l - 1)) in
 
   match s with
   | "+" -> Some (Plus, a)
