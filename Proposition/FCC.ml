@@ -80,10 +80,10 @@ let fcc_disj f1 f2 = FormeClausale.fold
   f1 FormeClausale.empty
 
 (** Mise en FCC, étape 3 : calcule la forme clausale associée à une formule. *)
-let rec formule_to_fcc (formule : formule) : forme_clausale = 
+let rec formule_to_fcc' (formule : formule) : forme_clausale = 
   match formule with
-  | Et (f, g) -> fcc_conj (formule_to_fcc f) (formule_to_fcc g)
-  | Ou (f, g) -> fcc_disj (formule_to_fcc f) (formule_to_fcc g)
+  | Et (f, g) -> fcc_conj (formule_to_fcc' f) (formule_to_fcc' g)
+  | Ou (f, g) -> fcc_disj (formule_to_fcc' f) (formule_to_fcc' g)
   | Non (Atome a) -> FormeClausale.singleton (Clause.singleton (Moins, a))
   | Atome a -> FormeClausale.singleton (Clause.singleton (Plus, a))
   | Top -> FormeClausale.empty
@@ -91,7 +91,7 @@ let rec formule_to_fcc (formule : formule) : forme_clausale =
   | _ -> failwith "How did you get here ?"
 
 (** Convertit une formule en une forme clausale conjonctive équivalente.*)
-let formule_to_fcc f = formule_to_fcc (descente_non (retrait_operateurs f))
+let formule_to_fcc f = formule_to_fcc' (descente_non (retrait_operateurs f))
 
 (* ----------------- From file ----------------- *)
 
