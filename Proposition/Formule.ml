@@ -84,7 +84,24 @@ let string_to_lit (str : string) : formule =
 (** Transforme une chaine contenant des éléments de la forme
     +at ou -at séparés par des espaces ou tabulations en une disjonction des
     formules obtenues en appliquant string_to_lit sur chaque élément. *)
-let string_to_disj (_ : string) : formule = failwith "à faire"
+let string_to_disj_opt (str : string) : formule option =
+  let atomes =
+    List.map
+      (string_to_lit)
+      (List.filter
+        (fun s -> "" <> s)
+        (List.fold_left
+          (@)
+          []
+          (List.map
+            (String.split_on_char '\t')
+            (String.split_on_char ' ' str)
+          )
+        )
+      )
+  in match atomes with
+  | [] -> None
+  | h::t -> Some (List.fold_left (fun f a -> Ou (f, a)) h t)
 
 (** Transforme un fichier texte dont le nom est donné en paramètre et dont chaque ligne est une chaine
     contenant des éléments de la forme
