@@ -34,16 +34,37 @@ let rec string_of_formule = function
 (* ----------------- Opérateurs de simplification ----------------- *)
 
 (** Opérateur disjonction, associatif à gauche. *)
-let ( + ) (_ : formule) (_ : formule) : formule = failwith "à faire"
+let ( + ) f g =
+  match (f, g) with
+  | Bot, _ -> g
+  | _, Bot -> f
+  | Top, _ 
+  | _, Top -> Top
+  | _ -> Ou (f, g)
 
 (** Opérateur de conjonction, associatif à gauche. *)
-let ( * ) (_ : formule) (_ : formule) : formule = failwith "à faire"
+let ( * ) f g =
+    match (f, g) with
+    | Bot, _
+    | _, Bot -> Bot
+    | Top, _ -> g
+    | _, Top -> f
+    | _ -> Et (f, g)
 
 (** Opérateur d'implication, associatif à droite. *)
-let ( ^-> ) (_ : formule) (_ : formule) : formule = failwith "à faire"
+let ( ^-> )  f g =
+    match (f, g) with
+    | Bot, _ -> Top
+    | Top, g -> g
+    | _ -> Imp (f, g)
 
 (** Opérateur de négation. *)
-let ( ~~ ) (_ : formule) : formule = failwith "à faire"
+let ( ~~ ) f =
+    match f with
+    | Bot -> Top
+    | Top -> Bot
+    | Non(Non f) -> f
+    | _ -> Non f
 
 (* ----------------- Lecture depuis un fichier ----------------- *)
 
