@@ -41,16 +41,6 @@ let rec retrait_operateurs (formule : formule) : formule =
   | Non f -> retrait_operateurs f
   | _ -> formule
 
-(*
-Bot
-Top
-Atome
-Imp
-Ou
-Et
-Non
-*)
-
 (** Mise en FCC, étape 2 : Descend les négations dans une formule au plus profond de l'arbre syntaxique,
     en préservant les évaluations. *)
 let rec descente_non (formule : formule) : formule = 
