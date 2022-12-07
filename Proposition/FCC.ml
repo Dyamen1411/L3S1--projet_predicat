@@ -72,8 +72,10 @@ let rec descente_non (formule : formule) : formule =
   )
   | _ -> formule
 
+(** Calcule la conjoncion de deux FCC. *)
 let fcc_conj = FormeClausale.union
 
+(** Calcule la disjonction de deux FCC. *)
 let fcc_disj f1 f2 = FormeClausale.fold
   (fun c1 acc ->
     FormeClausale.fold
@@ -99,15 +101,42 @@ let formule_to_fcc f = formule_to_fcc' (descente_non (retrait_operateurs f))
 (* ----------------- From file ----------------- *)
 
 (** Transforme une chaine +at en (Plus, at) et -at en (Moins, at) *)
-let string_to_lit (_ : string) : litteral = failwith "à faire"
-
+let string_to_lit (str : string) : litteral = 
+  let l = String.length str in
+  if l < 2
+    then failwith ("Expected signed atom, got " ^ str)
+    else
+      let (s, a) = String.(sub str 0 1, sub str 1 (l - 1)) in
+      let signe = match s with
+        | "+" -> Plus
+        | "-" -> Moins
+        | _ -> failwith ("Excected sign, got " ^ s)
+      in (signe, a)
+  
 (** Transforme une chaine contenant des éléments de la forme
     +at ou -at séparés par des espaces ou tabulations en une clause contenant
     les littéraux obtenus en appliquant string_to_lit sur chaque élément *)
-let string_to_disj (_ : string) : clause = failwith "à faire"
+let string_to_disj (str : string) : clause =
+  Clause.of_list
+  (List.map
+    string_to_lit
+    (List.filter
+      (fun s -> "" <> s)
+      (List.fold_left
+        (@)
+        []
+        (List.map
+          (String.split_on_char '\t')
+          (String.split_on_char ' ' str)
+        )
+      )
+    )
+  )
 
 (** Transforme un fichier texte dont le nom est donné en paramètre et dont chaque ligne est une chaine
     contenant des éléments de la forme
     +at ou -at séparés par des espaces ou tabulations en la FCC contenant les clauses obtenues
     en appliquant string_to_disj sur chaque ligne *)
-let from_file (_ : string) : forme_clausale = failwith "à faire"
+let from_file (str : string) : forme_clausale = 
+  let lines = String.split_on_char '\n' str in
+  FormeClausale.of_list (List.map (string_to_disj) lines) 
