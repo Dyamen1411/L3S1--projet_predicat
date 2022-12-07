@@ -14,7 +14,8 @@ let atome x = Atome x
 (* ----------------- Représentation en chaîne de caractères ----------------- *)
 
 (** Conversion d'une formule en chaîne de caractères. *)
-let rec string_of_formule = function
+let rec string_of_formule (f : formule) : string = 
+  match f with
   | Atome s -> s
   | Et (f, g) ->
       String.concat ""
@@ -34,7 +35,7 @@ let rec string_of_formule = function
 (* ----------------- Opérateurs de simplification ----------------- *)
 
 (** Opérateur disjonction, associatif à gauche. *)
-let ( + ) f g =
+let ( + ) (f : formule) (g : formule) : formule =
   match (f, g) with
   | Bot, _ -> g
   | _, Bot -> f
@@ -43,7 +44,7 @@ let ( + ) f g =
   | _ -> Ou (f, g)
 
 (** Opérateur de conjonction, associatif à gauche. *)
-let ( * ) f g =
+let ( * ) (f : formule) (g : formule) : formule =
     match (f, g) with
     | Bot, _
     | _, Bot -> Bot
@@ -52,14 +53,14 @@ let ( * ) f g =
     | _ -> Et (f, g)
 
 (** Opérateur d'implication, associatif à droite. *)
-let ( ^-> )  f g =
+let ( ^-> ) (f : formule) (g : formule) : formule =
     match (f, g) with
     | Bot, _ -> Top
     | Top, g -> g
     | _ -> Imp (f, g)
 
 (** Opérateur de négation. *)
-let ( ~~ ) f =
+let ( ~~ ) (f : formule) : formule =
     match f with
     | Bot -> Top
     | Top -> Bot
