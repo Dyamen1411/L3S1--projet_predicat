@@ -49,7 +49,13 @@ let dpll_tauto (fcc : forme_clausale) : bool =
     && dpll_sat (simplif_fcc fcc (Moins, n))
 
 (** Applique l'algorithme DPLL pour déterminer si une fcc est une contradiction. *)
-let dpll_contra (_ : forme_clausale) : bool = failwith "à faire"
+let dpll_contra (fcc : forme_clausale) : bool =
+  let atomes = atomes_of_fcc fcc in
+  match atomes with
+  | [] -> FormeClausale.cardinal fcc != 0
+  | (n::_) ->
+    dpll_sat (simplif_fcc fcc (Plus, n))
+    && dpll_sat (simplif_fcc fcc (Moins, n))
 
 (** Applique l'algorithme DPLL pour déterminer si une fcc est satisfaisable, renvoyant None si ce n'est pas le cas
       et Some res sinon, où res est une liste de couples (atome, Booléen)
