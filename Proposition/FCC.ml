@@ -101,8 +101,17 @@ let formule_to_fcc f = formule_to_fcc' (descente_non (retrait_operateurs f))
 (* ----------------- From file ----------------- *)
 
 (** Transforme une chaine +at en (Plus, at) et -at en (Moins, at) *)
-let string_to_lit (_ : string) : litteral = failwith "à faire"
+let string_to_lit (str : string) : litteral option = 
+  let l = String.length str in
+  if l < 2 then None else
+  
+  let (s, a) = String.(sub str 0 1, sub str 1 l) in
 
+  match s with
+  | "+" -> Some (Plus, a)
+  | "-" -> Some (Moins, a)
+  | _ -> None
+  
 (** Transforme une chaine contenant des éléments de la forme
     +at ou -at séparés par des espaces ou tabulations en une clause contenant
     les littéraux obtenus en appliquant string_to_lit sur chaque élément *)
