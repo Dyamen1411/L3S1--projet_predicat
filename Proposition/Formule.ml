@@ -107,4 +107,10 @@ let string_to_disj_opt (str : string) : formule option =
     contenant des éléments de la forme
     +at ou -at séparés par des espaces ou tabulations en la conjonction des formules obtenues
     en appliquant string_to_disj sur chaque ligne. *)
-let from_file (_ : string) : formule = failwith "à faire"
+let from_file (str : string) : formule = 
+  let lines = String.split_on_char '\n' str in
+  let disjs' = List.map (string_to_disj_opt) lines in
+  let disjs = List.filter_map (Fun.id) disjs' in
+  match disjs with
+  | [] -> Top
+  | h::t -> List.fold_left (fun f d -> Et (f, d)) h t
