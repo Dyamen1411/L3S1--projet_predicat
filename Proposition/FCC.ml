@@ -101,16 +101,17 @@ let formule_to_fcc f = formule_to_fcc' (descente_non (retrait_operateurs f))
 (* ----------------- From file ----------------- *)
 
 (** Transforme une chaine +at en (Plus, at) et -at en (Moins, at) *)
-let string_to_lit_opt (str : string) : litteral option = 
+let string_to_lit (str : string) : litteral = 
   let l = String.length str in
-  if l < 2 then None else
-  
-  let (s, a) = String.(sub str 0 1, sub str 1 (l - 1)) in
-
-  match s with
-  | "+" -> Some (Plus, a)
-  | "-" -> Some (Moins, a)
-  | _ -> None
+  if l < 2
+    then failwith ("Expected signed atom, got " ^ str)
+    else
+      let (s, a) = String.(sub str 0 1, sub str 1 (l - 1)) in
+      let signe = match s with
+        | "+" -> Plus
+        | "-" -> Moins
+        | _ -> failwith ("Excected sign, got " ^ s)
+      in (signe, a)
   
 (** Transforme une chaine contenant des éléments de la forme
     +at ou -at séparés par des espaces ou tabulations en une clause contenant
