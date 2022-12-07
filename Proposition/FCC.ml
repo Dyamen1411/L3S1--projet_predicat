@@ -137,4 +137,6 @@ let string_to_disj (str : string) : clause =
     contenant des éléments de la forme
     +at ou -at séparés par des espaces ou tabulations en la FCC contenant les clauses obtenues
     en appliquant string_to_disj sur chaque ligne *)
-let from_file (_ : string) : forme_clausale = failwith "à faire"
+let from_file (str : string) : forme_clausale = 
+  let lines = String.split_on_char '\n' str in
+  FormeClausale.of_list (List.map (string_to_disj) lines) 
