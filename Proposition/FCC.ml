@@ -33,11 +33,17 @@ let string_of_fcc (_ : forme_clausale) : string = failwith "à faire"
 
 (** Mise en FCC, étape 1 : Transforme une formule en une formule équivalente avec des opérateurs 
     de conjonction, de disjonction, de négation, Bot et Top uniquement. *)
-let retrait_operateurs (_ : formule) : formule = failwith "à faire"
+let rec retrait_operateurs (formule : formule) : formule =
+  match formule with
+  | Imp (f, g) -> Ou (Non (retrait_operateurs f), retrait_operateurs g)
+  | Ou (f, g)  -> Ou (retrait_operateurs f, retrait_operateurs g)
+  | Et (f, g)  -> Et (retrait_operateurs f, retrait_operateurs g)
+  | Non f -> retrait_operateurs f
+  | _ -> formule
 
 (** Mise en FCC, étape 2 : Descend les négations dans une formule au plus profond de l'arbre syntaxique,
     en préservant les évaluations. *)
-let descente_non (_ : formule) : formule = failwith "à faire"
+let rec descente_non (_ : formule) : formule = failwith "à faire"
 
 (** Mise en FCC, étape 3 : calcule la forme clausale associée à une formule. *)
 let formule_to_fcc (_ : formule) : forme_clausale = failwith "à faire"
