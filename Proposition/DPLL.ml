@@ -30,7 +30,14 @@ let atomes_of_fcc (fcc : forme_clausale) =
   )
 
 (** Applique l'algorithme DPLL pour déterminer si une fcc est satisfaisable. *)
-let dpll_sat (_ : forme_clausale) : bool = failwith "à faire"
+let rec dpll_sat (fcc : forme_clausale) : bool = 
+  let atomes = atomes_of_fcc fcc in
+  match atomes with
+  | [] -> FormeClausale.cardinal fcc = 0
+  | (n::_) ->
+    dpll_sat (simplif_fcc fcc (Plus, n))
+    || dpll_sat (simplif_fcc fcc (Moins, n))
+
 
 (** Applique l'algorithme DPLL pour déterminer si une fcc est une tautologie. *)
 let dpll_tauto (_ : forme_clausale) : bool = failwith "à faire"
