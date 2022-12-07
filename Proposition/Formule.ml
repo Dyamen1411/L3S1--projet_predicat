@@ -70,7 +70,16 @@ let ( ~~ ) (f : formule) : formule =
 (* ----------------- Lecture depuis un fichier ----------------- *)
 
 (** Transforme une chaine +at en Atome at et -at en Non (Atome at). *)
-let string_to_lit (_ : string) : formule = failwith "à faire"
+let string_to_lit (str : string) : formule =
+  let l = String.length str in
+  if l < 2
+    then failwith ("Expected signed atom, got " ^ str)
+    else
+      let (s, a) = String.(sub str 0 1, Atome (sub str 1 (l - 1))) in
+      match s with
+        | "+" -> a
+        | "-" -> Non a
+        | _ -> failwith ("Excected sign, got " ^ s)
 
 (** Transforme une chaine contenant des éléments de la forme
     +at ou -at séparés par des espaces ou tabulations en une disjonction des
