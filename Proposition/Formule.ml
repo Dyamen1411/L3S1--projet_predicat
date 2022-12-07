@@ -14,7 +14,22 @@ let atome x = Atome x
 (* ----------------- Représentation en chaîne de caractères ----------------- *)
 
 (** Conversion d'une formule en chaîne de caractères. *)
-let string_of_formule (_ : formule) : string = failwith "à faire"
+let rec string_of_formule = function
+  | Atome s -> s
+  | Et (f, g) ->
+      String.concat ""
+        [ "("; string_of_formule f; " ^ "; string_of_formule g; ")" ]
+  | Ou (f, g) -> 
+      String.concat ""
+        [ "("; string_of_formule f; " v "; string_of_formule g; ")" ]
+  | Imp (f, g) ->
+      String.concat ""
+        [ "("; string_of_formule f; " -> "; string_of_formule g; ")" ]
+  | Non(f) -> 
+      String.concat ""
+        [ "(! "; string_of_formule f;")" ]
+  | Top -> "T"
+  | Bot -> "⊥"
 
 (* ----------------- Opérateurs de simplification ----------------- *)
 
