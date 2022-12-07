@@ -116,7 +116,22 @@ let string_to_lit (str : string) : litteral =
 (** Transforme une chaine contenant des éléments de la forme
     +at ou -at séparés par des espaces ou tabulations en une clause contenant
     les littéraux obtenus en appliquant string_to_lit sur chaque élément *)
-let string_to_disj (_ : string) : clause = failwith "à faire"
+let string_to_disj (str : string) : clause =
+  Clause.of_list
+  (List.map
+    string_to_lit
+    (List.filter
+      (fun s -> "" <> s)
+      (List.fold_left
+        (@)
+        []
+        (List.map
+          (String.split_on_char '\t')
+          (String.split_on_char ' ' str)
+        )
+      )
+    )
+  )
 
 (** Transforme un fichier texte dont le nom est donné en paramètre et dont chaque ligne est une chaine
     contenant des éléments de la forme
