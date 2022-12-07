@@ -28,8 +28,21 @@ end)
 type forme_clausale = FormeClausale.t
 (** Type synonyme : une forme clausale est un ensemble de clauses. *)
 
+(** Transforme un signe en un string *)
+let string_of_signe : (signe -> string) = function
+  | Plus -> ""
+  | Moins -> "¬"
+
+(** Transforme un litteral en string *)
+let string_of_litteral ((s, n) : litteral) : string = (string_of_signe s) ^ n
+
+(** Transforme une clause en string *)
+let string_of_clause (c : clause) =
+  (Clause.fold (fun l r -> r ^ (string_of_litteral l) ^ "; ") c "{") ^ "}"
+
 (** Transforme une forme clausale en string. *)
-let string_of_fcc (_ : forme_clausale) : string = failwith "à faire"
+let string_of_fcc (fc : forme_clausale) : string = 
+  (FormeClausale.fold (fun c r -> r ^ (string_of_clause c) ^ "; ") fc "[") ^ "]"
 
 (** Mise en FCC, étape 1 : Transforme une formule en une formule équivalente avec des opérateurs 
     de conjonction, de disjonction, de négation, Bot et Top uniquement. *)
