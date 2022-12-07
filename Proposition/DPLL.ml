@@ -4,6 +4,31 @@ open FCC
 let simplif_fcc (_ : forme_clausale) (_ : litteral) : forme_clausale =
   failwith "à faire"
 
+module StringSet = Set.Make(struct
+  type t = string
+  let compare = String.compare
+end)
+
+(** Renvoie la liste des atomes d'une FCC. *)
+let atomes_of_fcc (fcc : forme_clausale) =
+  StringSet.elements
+  (
+    FormeClausale.fold
+      (
+        fun c r ->
+          StringSet.union
+          r
+          (
+            Clause.fold
+              (fun (_, l) r' -> StringSet.add l r')
+              c
+              StringSet.empty
+          )
+      )
+      fcc
+      StringSet.empty
+  )
+
 (** Applique l'algorithme DPLL pour déterminer si une fcc est satisfaisable. *)
 let dpll_sat (_ : forme_clausale) : bool = failwith "à faire"
 
