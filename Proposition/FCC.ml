@@ -101,7 +101,7 @@ let formule_to_fcc f = formule_to_fcc' (descente_non (retrait_operateurs f))
 (* ----------------- From file ----------------- *)
 
 (** Transforme une chaine +at en (Plus, at) et -at en (Moins, at) *)
-let string_to_lit (str : string) : litteral option = 
+let string_to_lit_opt (str : string) : litteral option = 
   let l = String.length str in
   if l < 2 then None else
   
