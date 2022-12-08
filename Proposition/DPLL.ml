@@ -1,8 +1,4 @@
-open FCC
-
-(** Simplifie la forme clausale fcc en considérant que le littéral lit est vrai *)
-let simplif_fcc (_ : forme_clausale) (_ : litteral) : forme_clausale =
-  failwith "à faire"
+open FCC;;
 
 module StringSet = Set.Make(struct
   type t = string
@@ -29,6 +25,16 @@ let atomes_of_fcc (fcc : forme_clausale) =
       StringSet.empty
   )
 
+(** Simplifie la forme clausale fcc en considérant que le littéral lit est vrai *)
+let simplif_fcc (fcc : forme_clausale) ((s, n) : litteral) : forme_clausale =
+  FormeClausale.filter_map
+    (fun c ->
+      if Clause.mem (s, n) c
+        then None
+        else Some (Clause.filter (fun (_, n') -> n' <> n) c)
+    )
+    fcc
+    
 (** Applique l'algorithme DPLL pour déterminer si une fcc est satisfaisable. *)
 let rec dpll_sat (fcc : forme_clausale) : bool = 
   let atomes = atomes_of_fcc fcc in
