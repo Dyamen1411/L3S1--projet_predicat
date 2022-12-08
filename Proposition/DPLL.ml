@@ -76,5 +76,18 @@ let rec dpll_ex_sat (fcc : forme_clausale) : (string * bool) list option =
 
 (** Renvoie la liste des listes de couples (atome, Booléen) suffisants pour que la formule soit vraie,
     selon l'algorithme DPLL. *)
-let dpll_all_sat (_ : forme_clausale) : (string * bool) list list =
-  failwith "à faire"
+let rec dpll_all_sat (fcc : forme_clausale) : (string * bool) list list =
+  match atomes_of_fcc fcc with
+  | [] ->
+    if FormeClausale.cardinal fcc = 0
+      then [[]]
+      else []
+  | (n::_) ->
+    let p = List.map
+      (fun s -> (n, true)::s)
+      (dpll_all_sat (simplif_fcc fcc (Plus, n)))
+    and m = List.map
+      (fun s -> (n, false)::s)
+      (dpll_all_sat (simplif_fcc fcc (Moins, n)))
+    in
+    p @ m
