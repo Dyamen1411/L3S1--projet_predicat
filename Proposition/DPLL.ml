@@ -60,8 +60,19 @@ let dpll_contra (fcc : forme_clausale) : bool =
 (** Applique l'algorithme DPLL pour déterminer si une fcc est satisfaisable, renvoyant None si ce n'est pas le cas
       et Some res sinon, où res est une liste de couples (atome, Booléen)
       suffisants pour que la formule soit vraie. *)
-let dpll_ex_sat (_ : forme_clausale) : (string * bool) list option =
-  failwith "à faire"
+let rec dpll_ex_sat (fcc : forme_clausale) : (string * bool) list option =
+  match atomes_of_fcc fcc with
+  | [] ->
+    if FormeClausale.cardinal fcc = 0
+      then Some []
+      else None
+  | (n::_) ->
+    match dpll_ex_sat (simplif_fcc fcc (Plus, n)) with
+    | Some s -> Some ((n, true)::s)
+    | None ->
+      match dpll_ex_sat (simplif_fcc fcc (Moins, n)) with
+      | Some s -> Some ((n, false)::s)
+      | None -> None
 
 (** Renvoie la liste des listes de couples (atome, Booléen) suffisants pour que la formule soit vraie,
     selon l'algorithme DPLL. *)
