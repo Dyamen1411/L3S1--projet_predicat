@@ -49,25 +49,35 @@ module StringSet = Set.Make(struct
   let compare = String.compare
 end)
 
-(** Renvoie la liste des atomes d'une FCC. *)
-let atomes_of_fcc (fcc : forme_clausale) =
-  StringSet.elements
-  (
-    FormeClausale.fold
-      (
-        fun c r ->
-          StringSet.union
-          r
-          (
-            Clause.fold
-              (fun (_, l) r' -> StringSet.add l r')
-              c
-              StringSet.empty
-          )
-      )
-      fcc
-      StringSet.empty
+let atomes_of_clause (c : clause) : string list =
+  StringSet.elements (
+    Clause.fold
+      (fun (_, l) r -> StringSet.add l r)
+      c StringSet.empty
   )
+
+(** Renvoie la liste des atomes d'une FCC. *)
+let atomes_of_fcc (fcc : forme_clausale) : string list =
+  StringSet.elements (
+    FormeClausale.fold
+      (fun c r -> StringSet.union r (StringSet.of_list (atomes_of_clause c)))
+      fcc StringSet.empty
+  )
+
+(** 'Optimise' une FCC en:
+    - Utilisant le tiers exclu *)
+let optimize_fcc (fcc : forme_clausale) : forme_clausale =
+  let opp = function
+    | Plus -> Moins
+    | Moins -> Plus
+  in
+  FormeClausale.filter
+    (fun c -> Clause.fold
+      (fun (s, n) r -> r || not (Clause.mem (opp s, n) c))
+      c true
+    )
+  fcc
+;;  
 
 (** Mise en FCC, étape 1 : Transforme une formule en une formule équivalente avec des opérateurs 
     de conjonction, de disjonction, de négation, Bot et Top uniquement. *)
@@ -121,7 +131,8 @@ let rec formule_to_fcc' (formule : formule) : forme_clausale =
   | _ -> failwith "How did you get here ?"
 
 (** Convertit une formule en une forme clausale conjonctive équivalente.*)
-let formule_to_fcc f = formule_to_fcc' (descente_non (retrait_operateurs f))
+let formule_to_fcc f = optimize_fcc
+  (formule_to_fcc' (descente_non (retrait_operateurs f)))
 
 (* ----------------- From file ----------------- *)
 
@@ -164,4 +175,4 @@ let string_to_disj (str : string) : clause =
     en appliquant string_to_disj sur chaque ligne *)
 let from_file (str : string) : forme_clausale = 
   let lines = String.split_on_char '\n' str in
-  FormeClausale.of_list (List.map (string_to_disj) lines) 
+  optimize_fcc (FormeClausale.of_list (List.map (string_to_disj) lines))
