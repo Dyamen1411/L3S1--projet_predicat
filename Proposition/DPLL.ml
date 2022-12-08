@@ -1,30 +1,5 @@
 open FCC;;
 
-module StringSet = Set.Make(struct
-  type t = string
-  let compare = String.compare
-end)
-
-(** Renvoie la liste des atomes d'une FCC. *)
-let atomes_of_fcc (fcc : forme_clausale) =
-  StringSet.elements
-  (
-    FormeClausale.fold
-      (
-        fun c r ->
-          StringSet.union
-          r
-          (
-            Clause.fold
-              (fun (_, l) r' -> StringSet.add l r')
-              c
-              StringSet.empty
-          )
-      )
-      fcc
-      StringSet.empty
-  )
-
 (** Simplifie la forme clausale fcc en considérant que le littéral lit est vrai *)
 let simplif_fcc (fcc : forme_clausale) ((s, n) : litteral) : forme_clausale =
   FormeClausale.filter_map

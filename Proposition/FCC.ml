@@ -44,6 +44,31 @@ let string_of_clause (c : clause) =
 let string_of_fcc (fc : forme_clausale) : string = 
   (FormeClausale.fold (fun c r -> r ^ (string_of_clause c) ^ "; ") fc "[") ^ "]"
 
+module StringSet = Set.Make(struct
+  type t = string
+  let compare = String.compare
+end)
+
+(** Renvoie la liste des atomes d'une FCC. *)
+let atomes_of_fcc (fcc : forme_clausale) =
+  StringSet.elements
+  (
+    FormeClausale.fold
+      (
+        fun c r ->
+          StringSet.union
+          r
+          (
+            Clause.fold
+              (fun (_, l) r' -> StringSet.add l r')
+              c
+              StringSet.empty
+          )
+      )
+      fcc
+      StringSet.empty
+  )
+
 (** Mise en FCC, étape 1 : Transforme une formule en une formule équivalente avec des opérateurs 
     de conjonction, de disjonction, de négation, Bot et Top uniquement. *)
 let rec retrait_operateurs (formule : formule) : formule =
