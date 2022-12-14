@@ -66,7 +66,7 @@ let atomes_of_fcc (fcc : forme_clausale) : string list =
 
 (** 'Optimise' une FCC en:
     - Utilisant le tiers exclu *)
-let optimize_fcc (fcc : forme_clausale) : forme_clausale =
+let optimize_fcc : forme_clausale -> forme_clausale =
   let opp = function
     | Plus -> Moins
     | Moins -> Plus
@@ -76,18 +76,16 @@ let optimize_fcc (fcc : forme_clausale) : forme_clausale =
       (fun (s, n) r -> r || not (Clause.mem (opp s, n) c))
       c true
     )
-  fcc
 ;;  
 
 (** Mise en FCC, étape 1 : Transforme une formule en une formule équivalente avec des opérateurs 
     de conjonction, de disjonction, de négation, Bot et Top uniquement. *)
-let rec retrait_operateurs (formule : formule) : formule =
-  match formule with
+let rec retrait_operateurs : formule -> formule = function
   | Imp (f, g) -> Ou (Non (retrait_operateurs f), retrait_operateurs g)
   | Ou (f, g)  -> Ou (retrait_operateurs f, retrait_operateurs g)
   | Et (f, g)  -> Et (retrait_operateurs f, retrait_operateurs g)
   | Non f -> retrait_operateurs f
-  | _ -> formule
+  | f -> f
 
 (** Mise en FCC, étape 2 : Descend les négations dans une formule au plus profond de l'arbre syntaxique,
     en préservant les évaluations. *)
