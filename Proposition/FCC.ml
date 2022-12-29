@@ -81,10 +81,11 @@ let optimize_fcc : forme_clausale -> forme_clausale =
 (** Mise en FCC, étape 1 : Transforme une formule en une formule équivalente avec des opérateurs 
     de conjonction, de disjonction, de négation, Bot et Top uniquement. *)
 let rec retrait_operateurs : formule -> formule = function
-  | Imp (f, g) -> Ou (Non (retrait_operateurs f), retrait_operateurs g)
-  | Ou (f, g)  -> Ou (retrait_operateurs f, retrait_operateurs g)
-  | Et (f, g)  -> Et (retrait_operateurs f, retrait_operateurs g)
-  | Non f -> retrait_operateurs f
+  | Imp (f, g)  -> (~~(retrait_operateurs f)) + (retrait_operateurs g)
+  | Ou  (f, g)  -> (retrait_operateurs f) + (retrait_operateurs g)
+  | Et  (f, g)  -> (retrait_operateurs f) * (retrait_operateurs g)
+  | Xor (f, g)  -> let (f', g') = (retrait_operateurs f, retrait_operateurs g) in (f' * ~~g') + (~~f' * g')
+  | Non f       -> retrait_operateurs f
   | f -> f
 
 (** Mise en FCC, étape 2 : Descend les négations dans une formule au plus profond de l'arbre syntaxique,
