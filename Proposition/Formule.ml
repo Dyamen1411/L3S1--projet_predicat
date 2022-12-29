@@ -19,10 +19,10 @@ let rec string_of_formule (f : formule) : string =
   | Atome s -> s
   | Et (f, g) ->
       String.concat ""
-        [ "("; string_of_formule f; " ^ "; string_of_formule g; ")" ]
+        [ "("; string_of_formule f; " * "; string_of_formule g; ")" ]
   | Ou (f, g) -> 
       String.concat ""
-        [ "("; string_of_formule f; " v "; string_of_formule g; ")" ]
+        [ "("; string_of_formule f; " | "; string_of_formule g; ")" ]
   | Imp (f, g) ->
       String.concat ""
         [ "("; string_of_formule f; " -> "; string_of_formule g; ")" ]
