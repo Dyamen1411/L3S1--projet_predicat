@@ -92,8 +92,8 @@ let rec retrait_operateurs : formule -> formule = function
     en préservant les évaluations. *)
 let rec descente_non (formule : formule) : formule = 
   match formule with
-  | Et (f, g) -> Et (descente_non (Non f), descente_non (Non g))
-  | Ou (f, g) -> Ou (descente_non (Non f), descente_non (Non g))
+  | Et (f, g) -> Et (descente_non f, descente_non g)
+  | Ou (f, g) -> Ou (descente_non f, descente_non g)
   | Non formule' ->
   (
     match formule' with
