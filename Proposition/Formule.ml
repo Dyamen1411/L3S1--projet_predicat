@@ -3,10 +3,11 @@ type formule =
   | Bot
   | Top
   | Atome of string
-  | Imp of (formule * formule)
-  | Ou of (formule * formule)
-  | Et of (formule * formule)
-  | Non of formule
+  | Imp   of (formule * formule)
+  | Ou    of (formule * formule)
+  | Et    of (formule * formule)
+  | Xor   of (formule * formule)
+  | Non   of formule
 
 (** Fonction de construction d'atome. *)
 let atome x = Atome x
@@ -26,9 +27,12 @@ let rec string_of_formule (f : formule) : string =
   | Imp (f, g) ->
       String.concat ""
         [ "("; string_of_formule f; " -> "; string_of_formule g; ")" ]
-  | Non(f) -> 
+  | Non (f) -> 
       String.concat ""
         [ "(! "; string_of_formule f;")" ]
+  | Xor (f, g) ->
+    String.concat ""
+        [ "("; string_of_formule f; " ^ "; string_of_formule g; ")" ]
   | Top -> "T"
   | Bot -> "⊥"
 
@@ -45,27 +49,33 @@ let ( + ) (f : formule) (g : formule) : formule =
 
 (** Opérateur de conjonction, associatif à gauche. *)
 let ( * ) (f : formule) (g : formule) : formule =
-    match (f, g) with
-    | Bot, _
-    | _, Bot -> Bot
-    | Top, _ -> g
-    | _, Top -> f
-    | _ -> Et (f, g)
+  match (f, g) with
+  | Bot, _
+  | _, Bot -> Bot
+  | Top, _ -> g
+  | _, Top -> f
+  | _ -> Et (f, g)
 
 (** Opérateur d'implication, associatif à droite. *)
 let ( ^-> ) (f : formule) (g : formule) : formule =
-    match (f, g) with
-    | Bot, _ -> Top
-    | Top, g -> g
-    | _ -> Imp (f, g)
+  match (f, g) with
+  | Bot, _ -> Top
+  | Top, g -> g
+  | _ -> Imp (f, g)
 
 (** Opérateur de négation. *)
 let ( ~~ ) (f : formule) : formule =
-    match f with
-    | Bot -> Top
-    | Top -> Bot
-    | Non(Non f) -> f
-    | _ -> Non f
+  match f with
+  | Bot -> Top
+  | Top -> Bot
+  | Non(Non f) -> f
+  | _ -> Non f
+
+let ( ^+ ) f g =
+  match (f, g) with
+  | (Top, f) | (f, Top) -> Non f
+  | (Bot, f) | (f, Bot) -> f
+  | _                   -> Xor (f, g)
 
 (* ----------------- Lecture depuis un fichier ----------------- *)
 
