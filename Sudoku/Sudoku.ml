@@ -191,6 +191,14 @@ let print_res r =
 
 (** Boucle principale *)
 let main () =
+  print_endline (string_of_formule (tous contrainte_1));
+  print_newline ();
+  print_endline (string_of_formule (tous contrainte_2));
+  print_newline ();
+  print_endline (string_of_formule (tous contrainte_3));
+  print_newline ();
+  print_endline (string_of_formule (tous contrainte_4));
+  print_newline ();
   if Array.length Sys.argv = 2 then
     match Sys.argv.(1) with
     | "0" -> print_res solve_sudoku_simple (* 1 sec *)

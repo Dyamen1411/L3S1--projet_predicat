@@ -52,16 +52,16 @@ let ( * ) (f : formule) (g : formule) : formule =
   match (f, g) with
   | Bot, _
   | _, Bot  -> Bot
-  | Top, _  -> g
-  | _, Top  -> f
+  | Top, x
+  | x, Top  -> x
   | _       -> Et (f, g)
 
 (** Opérateur d'implication, associatif à droite. *)
 let ( ^-> ) (f : formule) (g : formule) : formule =
   match (f, g) with
-  | Bot, _  -> Top
-  | Top, _  -> g
+  | Bot, _
   | _, Top  -> Top
+  | Top, _  -> g
   | _, Bot  -> Non f
   | _       -> Imp (f, g)
 
@@ -73,13 +73,13 @@ let ( ~~ ) (f : formule) : formule =
   | Non f'        -> f'
   | _             -> Non f
 
-  (** Opérateur ou exclusif*)
+(** Opérateur ou exclusif*)
 let ( ^+ ) f g =
   match (f, g) with
-  | Top, _  -> Non g
-  | _, Top  -> Non f
-  | Bot, _  -> g
-  | _, Bot  -> f
+  | Top, x
+  | x, Top  -> Non x
+  | Bot, x
+  | x, Bot  -> x
   | _       -> Xor (f, g)
   
 (* ----------------- Lecture depuis un fichier ----------------- *)
