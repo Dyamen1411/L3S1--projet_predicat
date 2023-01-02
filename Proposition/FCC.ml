@@ -37,12 +37,10 @@ let string_of_signe : (signe -> string) = function
 let string_of_litteral ((s, n) : litteral) : string = (string_of_signe s) ^ n
 
 (** Transforme une clause en string *)
-let string_of_clause (c : clause) =
-  (Clause.fold (fun l r -> r ^ (string_of_litteral l) ^ "; ") c "{") ^ "}"
+let string_of_clause c = "{" ^ String.concat "," (List.map string_of_litteral (Clause.elements c)) ^ "}"
 
 (** Transforme une forme clausale en string. *)
-let string_of_fcc (fc : forme_clausale) : string = 
-  (FormeClausale.fold (fun c r -> r ^ (string_of_clause c) ^ "; ") fc "[") ^ "]"
+let string_of_fcc fcc = "[" ^ String.concat "," (List.map string_of_clause (FormeClausale.elements fcc)) ^ "]"
 
 module StringSet = Set.Make(struct
   type t = string
@@ -81,30 +79,33 @@ let optimize_fcc : forme_clausale -> forme_clausale =
 (** Mise en FCC, étape 1 : Transforme une formule en une formule équivalente avec des opérateurs 
     de conjonction, de disjonction, de négation, Bot et Top uniquement. *)
 let rec retrait_operateurs : formule -> formule = function
-  | Imp (f, g)  -> (~~(retrait_operateurs f)) + (retrait_operateurs g)
+  | Imp (f, g)  -> (~~ (retrait_operateurs f)) + (retrait_operateurs g)
   | Ou  (f, g)  -> (retrait_operateurs f) + (retrait_operateurs g)
   | Et  (f, g)  -> (retrait_operateurs f) * (retrait_operateurs g)
-  | Xor (f, g)  -> let (f', g') = (retrait_operateurs f, retrait_operateurs g) in (f' * ~~g') + (~~f' * g')
-  | Non f       -> retrait_operateurs f
+  | Xor (f, g)  -> let (f', g') = (retrait_operateurs f, retrait_operateurs g) in (f' * (~~ g')) + ((~~ f') * g')
+  | Non f       -> ~~ (retrait_operateurs f)
   | f -> f
 
 (** Mise en FCC, étape 2 : Descend les négations dans une formule au plus profond de l'arbre syntaxique,
     en préservant les évaluations. *)
 let rec descente_non (formule : formule) : formule = 
   match formule with
-  | Et (f, g) -> Et (descente_non f, descente_non g)
-  | Ou (f, g) -> Ou (descente_non f, descente_non g)
+  | Et (f, g) -> descente_non f * descente_non g
+  | Ou (f, g) -> descente_non f + descente_non g
+  | Bot -> Bot
+  | Top -> Top
+  | Atome a -> Atome a
   | Non formule' ->
   (
     match formule' with
-    | Et (f, g) -> Ou (descente_non (Non f), descente_non (Non g))
-    | Ou (f, g) -> Et (descente_non (Non f), descente_non (Non g))
+    | Et (f, g) -> descente_non (~~ f) + descente_non (~~ g)
+    | Ou (f, g) -> descente_non (~~ f) * descente_non (~~ g)
     | Non f -> descente_non f
     | Top -> Bot
     | Bot -> Top
-    | _ -> Non formule'
+    | _ -> ~~ formule'
   )
-  | _ -> formule
+  | _ -> failwith "wtf"
 
 (** Calcule la conjoncion de deux FCC. *)
 let fcc_conj = FormeClausale.union
@@ -121,8 +122,8 @@ let fcc_disj f1 f2 = FormeClausale.fold
 (** Mise en FCC, étape 3 : calcule la forme clausale associée à une formule. *)
 let rec formule_to_fcc' (formule : formule) : forme_clausale = 
   match formule with
-  | Et (f, g) -> fcc_conj (formule_to_fcc' f) (formule_to_fcc' g)
-  | Ou (f, g) -> fcc_disj (formule_to_fcc' f) (formule_to_fcc' g)
+  | Et (f, g) -> fcc_conj (optimize_fcc(formule_to_fcc' f)) (optimize_fcc (formule_to_fcc' g))
+  | Ou (f, g) -> fcc_disj (optimize_fcc(formule_to_fcc' f)) (optimize_fcc (formule_to_fcc' g))
   | Non (Atome a) -> FormeClausale.singleton (Clause.singleton (Moins, a))
   | Atome a -> FormeClausale.singleton (Clause.singleton (Plus, a))
   | Top -> FormeClausale.empty
@@ -130,8 +131,9 @@ let rec formule_to_fcc' (formule : formule) : forme_clausale =
   | _ -> failwith "How did you get here ?"
 
 (** Convertit une formule en une forme clausale conjonctive équivalente.*)
-let formule_to_fcc f = optimize_fcc
+let formule_to_fcc f = 
   (formule_to_fcc' (descente_non (retrait_operateurs f)))
+
 
 (* ----------------- From file ----------------- *)
 

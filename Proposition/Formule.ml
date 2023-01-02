@@ -60,7 +60,7 @@ let ( * ) (f : formule) (g : formule) : formule =
 let ( ^-> ) (f : formule) (g : formule) : formule =
   match (f, g) with
   | Bot, _ -> Top
-  | Top, g -> g
+  | Top, g' -> g'
   | _ -> Imp (f, g)
 
 (** Opérateur de négation. *)
@@ -68,15 +68,18 @@ let ( ~~ ) (f : formule) : formule =
   match f with
   | Bot -> Top
   | Top -> Bot
-  | Non(Non f) -> f
+  | Non(Non f') -> f'
   | _ -> Non f
 
+  (** Opérateur ou exclusif*)
 let ( ^+ ) f g =
   match (f, g) with
-  | (Top, f) | (f, Top) -> Non f
-  | (Bot, f) | (f, Bot) -> f
-  | _                   -> Xor (f, g)
-
+  | (Top, f') 
+  | (f', Top) -> ~~ f'
+  | (Bot, f') 
+  | (f', Bot) -> f'
+  | _                   -> (f * (~~ g)) + ((~~ f) * g)
+  
 (* ----------------- Lecture depuis un fichier ----------------- *)
 
 (** Transforme une chaine +at en Atome at et -at en Non (Atome at). *)
