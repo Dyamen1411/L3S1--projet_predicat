@@ -51,34 +51,36 @@ let ( + ) (f : formule) (g : formule) : formule =
 let ( * ) (f : formule) (g : formule) : formule =
   match (f, g) with
   | Bot, _
-  | _, Bot -> Bot
-  | Top, _ -> g
-  | _, Top -> f
-  | _ -> Et (f, g)
+  | _, Bot  -> Bot
+  | Top, _  -> g
+  | _, Top  -> f
+  | _       -> Et (f, g)
 
 (** Opérateur d'implication, associatif à droite. *)
 let ( ^-> ) (f : formule) (g : formule) : formule =
   match (f, g) with
-  | Bot, _ -> Top
-  | Top, g' -> g'
-  | _ -> Imp (f, g)
+  | Bot, _  -> Top
+  | Top, _  -> g
+  | _, Top  -> Top
+  | _, Bot  -> Non f
+  | _       -> Imp (f, g)
 
 (** Opérateur de négation. *)
 let ( ~~ ) (f : formule) : formule =
   match f with
-  | Bot -> Top
-  | Top -> Bot
-  | Non(Non f') -> f'
-  | _ -> Non f
+  | Bot           -> Top
+  | Top           -> Bot
+  | Non f'        -> f'
+  | _             -> Non f
 
   (** Opérateur ou exclusif*)
 let ( ^+ ) f g =
   match (f, g) with
-  | (Top, f')
-  | (f', Top) -> ~~ f'
-  | (Bot, f')
-  | (f', Bot) -> f'
-  | _         -> Xor (f, g)
+  | Top, _  -> Non g
+  | _, Top  -> Non f
+  | Bot, _  -> g
+  | _, Bot  -> f
+  | _       -> Xor (f, g)
   
 (* ----------------- Lecture depuis un fichier ----------------- *)
 
@@ -102,7 +104,7 @@ let string_to_disj_opt (str : string) : formule option =
     List.map
       (string_to_lit)
       (List.filter
-        (fun s -> "" <> s)
+        ((<>) "")
         (List.fold_left
           (@)
           []

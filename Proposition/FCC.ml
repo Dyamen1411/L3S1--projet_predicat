@@ -90,20 +90,21 @@ let rec retrait_operateurs : formule -> formule = function
     en préservant les évaluations. *)
 let rec descente_non (formule : formule) : formule = 
   match formule with
-  | Et (f, g) -> descente_non f * descente_non g
-  | Ou (f, g) -> descente_non f + descente_non g
+  | Et (f, g) -> (descente_non f) * (descente_non g)
+  | Ou (f, g) -> (descente_non f) + (descente_non g)
   | Bot -> Bot
   | Top -> Top
   | Atome a -> Atome a
   | Non formule' ->
   (
     match formule' with
-    | Et (f, g) -> descente_non (~~ f) + descente_non (~~ g)
-    | Ou (f, g) -> descente_non (~~ f) * descente_non (~~ g)
+    | Et (f, g) -> (descente_non (~~f)) + (descente_non (~~g))
+    | Ou (f, g) -> (descente_non (~~f)) * (descente_non (~~g))
     | Non f -> descente_non f
     | Top -> Bot
     | Bot -> Top
-    | _ -> ~~ formule'
+    | Atome a -> Non (Atome a)
+    | _ -> failwith "wtf"
   )
   | _ -> failwith "wtf"
 
@@ -122,8 +123,8 @@ let fcc_disj f1 f2 = FormeClausale.fold
 (** Mise en FCC, étape 3 : calcule la forme clausale associée à une formule. *)
 let rec formule_to_fcc' (formule : formule) : forme_clausale = 
   match formule with
-  | Et (f, g) -> fcc_conj (optimize_fcc(formule_to_fcc' f)) (optimize_fcc (formule_to_fcc' g))
-  | Ou (f, g) -> fcc_disj (optimize_fcc(formule_to_fcc' f)) (optimize_fcc (formule_to_fcc' g))
+  | Et (f, g) -> fcc_conj ((formule_to_fcc' f)) ((formule_to_fcc' g))
+  | Ou (f, g) -> fcc_disj ((formule_to_fcc' f)) ((formule_to_fcc' g))
   | Non (Atome a) -> FormeClausale.singleton (Clause.singleton (Moins, a))
   | Atome a -> FormeClausale.singleton (Clause.singleton (Plus, a))
   | Top -> FormeClausale.empty
@@ -133,7 +134,6 @@ let rec formule_to_fcc' (formule : formule) : forme_clausale =
 (** Convertit une formule en une forme clausale conjonctive équivalente.*)
 let formule_to_fcc f = 
   (formule_to_fcc' (descente_non (retrait_operateurs f)))
-
 
 (* ----------------- From file ----------------- *)
 
