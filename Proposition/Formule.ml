@@ -74,11 +74,11 @@ let ( ~~ ) (f : formule) : formule =
   (** Opérateur ou exclusif*)
 let ( ^+ ) f g =
   match (f, g) with
-  | (Top, f') 
+  | (Top, f')
   | (f', Top) -> ~~ f'
-  | (Bot, f') 
+  | (Bot, f')
   | (f', Bot) -> f'
-  | _                   -> (f * (~~ g)) + ((~~ f) * g)
+  | _         -> Xor (f, g)
   
 (* ----------------- Lecture depuis un fichier ----------------- *)
 
